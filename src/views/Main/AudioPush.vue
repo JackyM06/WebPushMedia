@@ -49,8 +49,9 @@
                 }
               }) 
             },
-            // websocket 方案
-            async socketConnect(wsUrl){
+            /* ? websocket 方案 */
+            // 获取连接 
+            socketConnect(wsUrl){
               this.socket = io.connect(wsUrl)
               setTimeout(()=>{
                 this.socket.emit('start',this.pushUrl)
@@ -58,16 +59,12 @@
               },100)
                
             },
+            // 发送blob对象
             socketSend(blob){
-              // if(this.socket.connected){
-                this.socket.emit("sendBlob", blob)
-                this.Recording = true
-              // }else{
-                // this.endRecording()
-                // alert('建立websocket连接失败请检查是否正确开始Node推流服务')
-              // }
-              
+              this.socket.emit("sendBlob", blob)
+              this.Recording = true
             },
+            // 断开连接
             socketDisconnect(){
               this.socket.emit('end')
             },
@@ -106,18 +103,12 @@
                 // 获取音频流媒体
                 navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
                     this.$refs.audio.srcObject = stream
-                    // this.RtcpeerConnect(stream)
-                    // this.sendStream(stream) 
-                    this.socketConnect('http://localhost:8090')
-                    
+                    this.socketConnect('http://39.106.198.9:8090')
+                    // 创建MediaStreamRecorder对象
                     this.mediaRecorder = new MediaStreamRecorder(stream)
                     this.mediaRecorder.mimeType = 'audio/wav';
                     this.mediaRecorder.ondataavailable = (blob) => {
-                    // POST/PUT "Blob" using FormData/XHR2  
-                        let blobURL = URL.createObjectURL(blob);
-                        this.blobUrl = blobURL
                         this.socketSend(blob)                                     
-                        
                     }
                     this.mediaRecorder.start(1000)
                 })
