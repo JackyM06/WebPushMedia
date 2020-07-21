@@ -108,7 +108,7 @@
                     this.$refs.audio.srcObject = stream
                     // this.RtcpeerConnect(stream)
                     // this.sendStream(stream) 
-                    this.socketConnect('http://localhost:3000')
+                    this.socketConnect('http://localhost:8090')
                     
                     this.mediaRecorder = new MediaStreamRecorder(stream)
                     this.mediaRecorder.mimeType = 'audio/wav';
