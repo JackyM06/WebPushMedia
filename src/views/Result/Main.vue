@@ -16,7 +16,7 @@
   export default {
     data () {
       return {
-        urlCache:'http://localhost:8000/live/home.flv',
+        urlCache:'http://39.106.198.9:8000/live/home.flv',
         pushUrl:null,
         flvPlayer:null
       }

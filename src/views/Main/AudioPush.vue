@@ -23,7 +23,7 @@
                 Recording:false,
                 blobUrl:"",
                 mediaRecorder:null,
-                pushUrl:'rtmp://localhost:1935/live/home',
+                pushUrl:'rtmp://39.106.198.9:1935/live/home',
                 socket:null,
             }
         },
@@ -59,13 +59,13 @@
                
             },
             socketSend(blob){
-              if(this.socket.connected){
+              // if(this.socket.connected){
                 this.socket.emit("sendBlob", blob)
                 this.Recording = true
-              }else{
-                this.endRecording()
-                alert('建立websocket连接失败请检查是否正确开始Node推流服务')
-              }
+              // }else{
+                // this.endRecording()
+                // alert('建立websocket连接失败请检查是否正确开始Node推流服务')
+              // }
               
             },
             socketDisconnect(){
