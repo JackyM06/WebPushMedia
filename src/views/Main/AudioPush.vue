@@ -10,6 +10,7 @@
             <audio ref="audio" autoplay  controls="controls"></audio>
             <button @click="endRecording">取消录音</button>
         </div>
+        <p class="fs-xxs my-2 text-center" v-text="message"></p>
     </div>
 </template>
 
@@ -25,6 +26,8 @@
                 mediaRecorder:null,
                 pushUrl:'rtmp://39.106.198.9:1935/live/home',
                 socket:null,
+                message:'点击开始录音进行RTMP推流',
+                canSend:false
             }
         },
         methods:{
@@ -53,20 +56,35 @@
             // 获取连接 
             socketConnect(wsUrl){
               this.socket = io.connect(wsUrl)
-              setTimeout(()=>{
+              this.socket.on('connected',()=>{
                 this.socket.emit('start',this.pushUrl)
-                console.log(this.socket.connected)
-              },100)
-               
+                this.message = "webscocket连接成功，正在提交推流地址"
+              })
+              this.socket.on('started',()=>{
+                this.message = "推流地址提交成功，即将开始推流"
+                this.canSend = true
+              })
+              this.socket.on('startError',msg =>{
+                this.message = "操作异常请重试，错误信息:"+msg
+              })
             },
             // 发送blob对象
             socketSend(blob){
-              this.socket.emit("sendBlob", blob)
-              this.Recording = true
+              if(this.canSend){
+                this.socket.emit("sendBlob", blob)
+              }else{
+                this.message = '当前连接存在波动，正在重试'
+              }
+              this.socket.on('sent',()=>{
+                this.message = "正在推流，可到采集结果中拉流查看效果"
+              })
             },
             // 断开连接
             socketDisconnect(){
               this.socket.emit('end')
+              this.socket.on('ended',()=>{
+                this.message = '推流已结束'
+              })
             },
             //  方案3 采用RTCPeerConnection 方案 (已废弃)
             RtcpeerConnect(stream){
@@ -104,6 +122,8 @@
                 navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
                     this.$refs.audio.srcObject = stream
                     this.socketConnect('http://39.106.198.9:8090')
+                    // this.socketConnect('http://localhost:8090')
+                    this.Recording = true
                     // 创建MediaStreamRecorder对象
                     this.mediaRecorder = new MediaStreamRecorder(stream)
                     this.mediaRecorder.mimeType = 'audio/wav';
