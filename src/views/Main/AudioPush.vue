@@ -3,19 +3,15 @@
         <h3 class="text-center">音频采集</h3>
         <div v-show="!Recording" class="d-flex flex-column ai-center">
             <input class="mb-2 p-1" v-model="pushUrl" type="text" style="width:300px" placeholder="请输入推流的RTMP地址">
-            <button @click="beginRecording">开始录音</button>
+            <button @click="beginRecording">开始录音推流</button>
         </div>
         <div v-show="Recording" class="d-flex flex-column jc-center ai-center">
             <h4>本地预览</h4>
-            <audio ref="audio" autoplay  controls="controls"></audio>
-            <button @click="endRecording">取消录音</button>
+            <audio ref="audio" autoplay  controls="controls" muted="muted"></audio>
+            <button @click="endRecording">取消录音推流</button>
         </div>
         <p class="fs-xxs my-2 text-center" v-text="message"></p>
-        <div class="d-flex flex-column jc-center ai-center mt-3">
-          <h3>文件推流</h3>
-          <input ref="file" type="file" accept="audio/*" class="fs-xxs my-2 text-center">
-          <button @click="beginUpload">开始推流</button>
-        </div>
+        <!-- <textarea ref="msg" name="msg" id="" style="width:300px" cols="30" rows="10"></textarea> -->
     </div>
 </template>
 
@@ -32,8 +28,14 @@
                 pushUrl:'rtmp://39.106.198.9:1935/live/home',
                 socket:null,
                 message:'点击开始录音进行RTMP推流',
-                canSend:false
+                canSend:false,
             }
+        },
+        computed:{
+          connectURL(){
+            return 'http://localhost:8090'
+            // return 'http://39.106.198.9:8090'
+          }
         },
         methods:{
             // HTTP 方案
@@ -57,7 +59,7 @@
                 }
               }) 
             },
-            /* ? websocket 方案 */
+            // ? websocket 方案 
             // 获取连接 
             socketConnect(wsUrl){
               this.socket = io.connect(wsUrl)
@@ -86,10 +88,12 @@
             },
             // 断开连接
             socketDisconnect(){
-              this.socket.emit('end')
-              this.socket.on('ended',()=>{
-                this.message = '推流已结束'
-              })
+              if(this.socket){
+                this.socket.emit('end')
+                this.socket.on('ended',()=>{
+                  this.message = '推流已结束'
+                })
+              }
             },
             //  方案3 采用RTCPeerConnection 方案 (已废弃)
             RtcpeerConnect(stream){
@@ -126,8 +130,9 @@
                 // 获取音频流媒体
                 navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
                     this.$refs.audio.srcObject = stream
+                    this.$refs.audio.volume = 0
                     // this.socketConnect('http://39.106.198.9:8090')
-                    this.socketConnect('http://localhost:8090')
+                    this.socketConnect(this.connectURL)
                     this.Recording = true
                     // 创建MediaStreamRecorder对象
                     this.mediaRecorder = new MediaStreamRecorder(stream)
@@ -141,45 +146,21 @@
             // 结束录音
             endRecording(){
                 this.socketDisconnect()
-                this.mediaRecorder.stop()
-                this.Recording = false
-                this.$refs.audio.srcObject = null
+                if(this.mediaRecorder)this.mediaRecorder.stop()
+                Object.assign(this.$data, this.$options.data())
             },
-            socketFileSend(blob){
-              if(this.canSend){
-                this.socket.emit("sendFileBlob", blob)
-              }else{
-                this.message = '当前连接存在波动，正在重试'
-              }
-              this.socket.on('sent',()=>{
-                this.message = "正在推流，可到采集结果中拉流查看效果"
-              })
-            },
-            beginUpload(){
-              let file = this.$refs.file.files[0]
-              if(file){
-                let type = file.type
-                this.socketConnect('http://localhost:8090')
-                let reader = new FileReader()
-                reader.readAsArrayBuffer(file)
-                reader.onload = (e)=>{
-                  let blob = null
-                  if (typeof e.target.result === 'object') {
-                    blob = new Blob([e.target.result],{type})
-                  } else {
-                    blob = e.target.result
-                  }
-                  setTimeout(()=>{
-                    this.socketFileSend(blob)
-                  },3000)
-                  console.log('blob: ', blob);
-                }
-              }
-            }
+        },
+        watch:{
+          message(val){
+            console.log(val)
+          }
+        },
+        beforeDestroy(){
+          this.endRecording()
         }
     }
 </script>
 
 <style lang="scss" scoped>
-
+ 
 </style>

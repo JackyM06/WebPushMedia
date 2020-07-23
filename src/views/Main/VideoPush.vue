@@ -48,19 +48,18 @@
                 // 获取音频流媒体
                 navigator.mediaDevices.getUserMedia({audio: true,video: true}).then(stream => {
                     this.mediaRecorder = new MediaStreamRecorder(stream)
-                    this.mediaRecorder.stream = stream
                     this.Recording = true
                     this.$refs.video.srcObject = stream
                     // cons
                     this.mediaRecorder.mimeType = 'video/webm';
                     this.mediaRecorder.ondataavailable = (blob) => {
                     // POST/PUT "Blob" using FormData/XHR2
-                        this.sendBolb('POST','/stream',blob).then(()=>{
-                          console.log("send success")
-                        })
+                        // this.sendBolb('POST','/stream',blob).then(()=>{
+                        //   console.log("send success")
+                        // })
                         let blobURL = URL.createObjectURL(blob);
                         this.blobUrl = blobURL
-                        this.Recording = true
+                        // this.Recording = true
                     }
                     this.mediaRecorder.start(3000)
                 })
