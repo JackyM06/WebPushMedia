@@ -7,6 +7,7 @@
 
   <input type="text" class="inputStyle" v-model="urlCache" placeholder="请输入拉流地址，支持FLV">
   <p class="fs-xxs mb-2">仅支持flv格式,一般情况下在默认rtmp拉流地址后加上flv后缀即可。</p>
+  <p class="fs-xxs mb-2" ref="pullState" v-text="pullState"></p>
   <button @click="flvInit">开始</button>
 </div>
 </template>
@@ -17,24 +18,29 @@
     data () {
       return {
         urlCache:'http://39.106.198.9:8000/live/home.flv',
-        pushUrl:null,
-        flvPlayer:null
+        pullUrl:null,
+        flvPlayer:null,
+        pullState:"点击开始进行拉流"
       }
     },
     methods:{
       // 初始化flvPlayer
       flvInit(){
         this.flvDestory()
-        this.pushUrl = this.urlCache
+        this.pullUrl = this.urlCache
         if (flvjs.isSupported()) {
           var videoElement = document.getElementById('videoElement');
           this.flvPlayer = flvjs.createPlayer({
               type: 'flv',
-              url:this.pushUrl, //本地
+              url:this.pullUrl, //本地
           });
+          this.pullState = "当前拉流地址："+ this.pullUrl
           this.flvPlayer.attachMediaElement(videoElement);
           this.flvPlayer.load();
           this.flvPlayer.play();
+          videoElement.addEventListener('ended',()=>{
+            this.flvInit()
+          })
         }
       },
       // 销毁flvPlayer
