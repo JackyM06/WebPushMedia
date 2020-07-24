@@ -1,14 +1,13 @@
 <template>
     <div class="d-flex flex-column jc-center ai-center">        
         <div class="d-flex flex-column jc-center ai-center mt-3">
-          <h3>文件推流</h3>
-           <input class="mb-2 p-1" v-model="pushUrl" type="text" style="width:300px" placeholder="请输入推流的RTMP地址">
-          <input ref="file" type="file" accept="audio/*" class="fs-xxs my-2 text-center">
+          <h3>文件URL推流 (试验阶段)</h3>
+          <p class="fs-xxs text-center mb-1">请输入推流的RTMP地址</p>
+          <input class="mb-1 p-1" v-model="pushUrl" type="text" style="width:300px" placeholder="请输入推流的RTMP地址">
+          <p class="fs-xxs mb-1 text-center">请输入文件的URL地址</p>
+          <textarea ref="FileUrl" v-model="FileUrl" style="width:300px" class="fs-xxs mb-2" placeholder="请输入文件的URL地址" rows="5" cols="20"></textarea>
           <button v-show="!Uploading" @click="beginUpload">开始文件推流</button>
-          <div v-show="Uploading" class="d-flex flex-column jc-center ai-center mt-3">
-            <!-- <audio ref="audio" autoplay  controls="controls" muted="muted"></audio> -->
-            <button  @click="endUploading">取消文件推流</button>
-          </div>
+          <button v-show="Uploading" @click="endUploading">取消文件推流</button>
           <p class="fs-xxs my-2 text-center" v-text="message"></p>
         </div>
     </div>
@@ -20,37 +19,37 @@
     export default {
         data () {
             return {
-                Recording:false,
-                blobUrl:"",
-                mediaRecorder:null,
                 pushUrl:'rtmp://39.106.198.9:1935/live/home',
                 socket:null,
                 message:'点击开始文件推流进行RTMP推流',
+                Uploading:false,
                 canSend:false,
-                Uploading:false
+                FileUrl:""
             }
         },
         computed:{
           connectURL(){
-            // return 'http://localhost:8090'
-            return 'http://39.106.198.9:8090'
+            return 'http://localhost:8090'
+            // return 'http://39.106.198.9:8090'
           }
         },
         methods:{
             // ? websocket 方案 //
             // 获取连接 
             socketConnect(wsUrl){
-              this.socket = io.connect(wsUrl)
+              this.socket = io.connect(wsUrl,{ 'reconnect': false, 'auto connect': false, })
               this.socket.on('connected',()=>{
-                this.socket.emit('start',this.pushUrl)
                 this.message = "webscocket连接成功，正在提交推流地址"
-              })
-              this.socket.on('started',()=>{
-                this.message = "推流地址提交成功，即将开始推流"
                 this.canSend = true
+                if(this.FileUrl){
+                  this.Uploading = true
+                  this.socketFileSend(this.FileUrl,this.pushUrl)
+                }
               })
               this.socket.on('startError',msg =>{
                 this.message = "操作异常请重试，错误信息:"+msg
+                this.Uploading = false
+                this.canSend = false
               })
               this.socket.on('ended',()=>{
                 this.message = '推流已结束'
@@ -64,9 +63,9 @@
                 this.socket.emit('end')
               }
             },
-            socketFileSend(blob){
+            socketFileSend(FileUrl,pushUrl){
               if(this.canSend){
-                this.socket.emit("sendFileBlob", blob)
+                this.socket.emit("sendFileUrl", FileUrl,pushUrl)
               }else{
                 this.message = '当前连接存在波动，正在重试'
               }
@@ -74,38 +73,16 @@
                 this.message = "正在推流，可到采集结果中拉流查看效果"
               })
             },
+
             beginUpload(){
-              let file = this.$refs.file.files[0]
-              if(file){
-                this.fileSlice(file)
-                let type = file.type
-                this.socketConnect(this.connectURL)
-                let reader = new FileReader()
-                reader.readAsArrayBuffer(file)
-                reader.onload = (e)=>{
-                  let blob = null
-                  if (typeof e.target.result === 'object') {
-                    blob = new Blob([e.target.result],{type})
-                  } else {
-                    blob = e.target.result
-                  }
-                  this.Uploading = true
-                  setTimeout(()=>{
-                    this.socketFileSend(blob)
-                  },3000)
-                  console.log('blob: ', blob);
-                }
-              }else{
-                alert("请选择音频文件")
-              }
+              this.socketConnect(this.connectURL)
             },
             endUploading(){
               this.socketDisconnect()
-              Object.assign(this.$data, this.$options.data())
+              this.Uploading = false
+              this.canSend = false
+              this.socket = null
             },
-            fileSlice(file){
-              console.log(file)
-            }
         },
         beforeDestroy(){
           this.endUploading()
