@@ -29,8 +29,8 @@
         },
         computed:{
           connectURL(){
-            return 'http://localhost:8090'
-            // return 'http://39.106.198.9:8090'
+            // return 'http://localhost:8090'
+            return 'http://39.106.198.9:8090'
           }
         },
         methods:{
