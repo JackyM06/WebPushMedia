@@ -3,7 +3,7 @@
         <div class="d-flex flex-column jc-center ai-center mt-3">
           <h3>文件推流</h3>
            <input class="mb-2 p-1" v-model="pushUrl" type="text" style="width:300px" placeholder="请输入推流的RTMP地址">
-          <input ref="file" type="file" accept="audio/*" class="fs-xxs my-2 text-center">
+          <input ref="file" type="file" accept="audio/*,video/*" class="fs-xxs my-2 text-center">
           <button v-show="!Uploading" @click="beginUpload">开始文件推流</button>
           <div v-show="Uploading" class="d-flex flex-column jc-center ai-center mt-3">
             <!-- <audio ref="audio" autoplay  controls="controls" muted="muted"></audio> -->
@@ -18,6 +18,12 @@
     import io from 'socket.io-client'
     // import MediaStreamRecorder from 'msr'
     export default {
+        props:{
+          connectURL:{
+            type:String,
+            default:'http://localhost:8090'
+          }
+        },
         data () {
             return {
                 Recording:false,
@@ -25,16 +31,11 @@
                 mediaRecorder:null,
                 pushUrl:'rtmp://39.106.198.9:1935/live/home',
                 socket:null,
-                message:'点击开始文件推流进行RTMP推流',
+                message:'选择音频或视频文件后，点击开始文件推流进行RTMP推流',
                 canSend:false,
-                Uploading:false
+                Uploading:false,
+                type:"audio",
             }
-        },
-        computed:{
-          connectURL(){
-            // return 'http://localhost:8090'
-            return 'http://39.106.198.9:8090'
-          }
         },
         methods:{
             // ? websocket 方案 //
@@ -42,7 +43,7 @@
             socketConnect(wsUrl){
               this.socket = io.connect(wsUrl)
               this.socket.on('connected',()=>{
-                this.socket.emit('start',this.pushUrl)
+                this.socket.emit('start',this.pushUrl,this.type)
                 this.message = "webscocket连接成功，正在提交推流地址"
               })
               this.socket.on('started',()=>{
@@ -77,8 +78,8 @@
             beginUpload(){
               let file = this.$refs.file.files[0]
               if(file){
-                this.fileSlice(file)
                 let type = file.type
+                this.type = type.slice(0,5)
                 this.socketConnect(this.connectURL)
                 let reader = new FileReader()
                 reader.readAsArrayBuffer(file)
@@ -93,7 +94,6 @@
                   setTimeout(()=>{
                     this.socketFileSend(blob)
                   },3000)
-                  console.log('blob: ', blob);
                 }
               }else{
                 alert("请选择音频文件")
@@ -103,9 +103,6 @@
               this.socketDisconnect()
               Object.assign(this.$data, this.$options.data())
             },
-            fileSlice(file){
-              console.log(file)
-            }
         },
         beforeDestroy(){
           this.endUploading()

@@ -17,6 +17,12 @@
     import io from 'socket.io-client'
     // import MediaStreamRecorder from 'msr'
     export default {
+        props:{
+          connectURL:{
+            type:String,
+            default:'http://localhost:8090'
+          }
+        },
         data () {
             return {
                 pushUrl:'rtmp://39.106.198.9:1935/live/home',
@@ -26,12 +32,6 @@
                 canSend:false,
                 FileUrl:""
             }
-        },
-        computed:{
-          connectURL(){
-            // return 'http://localhost:8090'
-            return 'http://39.106.198.9:8090'
-          }
         },
         methods:{
             // ? websocket 方案 //

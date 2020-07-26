@@ -20,6 +20,12 @@
     // import { createWorker }  from 'ffmpeg.js'
     import io from 'socket.io-client'
     export default {
+        props:{
+          connectURL:{
+            type:String,
+            default:'http://localhost:8090'
+          }
+        },
         data () {
             return {
                 Recording:false,
@@ -30,12 +36,6 @@
                 message:'点击开始录音进行RTMP推流',
                 canSend:false,
             }
-        },
-        computed:{
-          connectURL(){
-            // return 'http://localhost:8090'
-            return 'http://39.106.198.9:8090'
-          }
         },
         methods:{
             // HTTP 方案

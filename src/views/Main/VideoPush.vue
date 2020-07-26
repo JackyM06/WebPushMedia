@@ -8,7 +8,7 @@
         <div v-show="Recording" class="d-flex flex-column jc-center ai-center">
             <h4>本地预览</h4>
             <video ref="video" autoplay  controls="controls" muted="muted"></video>
-            <button @click="endRecording">取消摄像推流</button>
+            <button class="mt-2" @click="endRecording">取消摄像推流</button>
         </div>
         <p class="fs-xxs my-2 text-center" v-text="message"></p>
         <!-- <textarea ref="msg" name="msg" id="" style="width:300px" cols="30" rows="10"></textarea> -->
@@ -19,6 +19,12 @@
     import MediaStreamRecorder from 'msr'
     import io from 'socket.io-client'
     export default {
+        props:{
+          connectURL:{
+            type:String,
+            default:'http://localhost:8090'
+          }
+        },
         data () {
             return {
                 Recording:false,
@@ -30,12 +36,6 @@
                 canSend:false,
                 type:'video'
             }
-        },
-        computed:{
-          connectURL(){
-            // return 'http://localhost:8090'
-            return 'http://39.106.198.9:8090'
-          }
         },
         methods:{
           // ? websocket 方案 
@@ -149,5 +149,7 @@
 </script>
 
 <style lang="scss" scoped>
- 
+ video{
+   width: 400px;
+ }
 </style>

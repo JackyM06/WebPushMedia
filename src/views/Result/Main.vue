@@ -1,14 +1,19 @@
 <template>
 <div class="box">
-  <h1 class="mb-4">RTMP语音拉流</h1>
-  
-  <audio id="videoElement" autoplay  style="width: 60%;" class="my-2" controls="controls"></audio>
-  <!-- <video id="videoElement" autoplay  style="width: 60%;" controls="controls"></video> -->
-
+  <div v-if="isAudio" class="text-center">
+    <h1 class="mb-4">RTMP语音拉流</h1>
+    <audio id="MediaElement" autoplay  class="my-2" controls="controls"></audio>
+  </div>
+  <div v-else class="text-center mb-2">
+    <h1 class="mb-4" >RTMP视频拉流</h1>
+    <video id="MediaElement"  autoplay  controls="controls"></video>
+  </div>
   <input type="text" class="inputStyle" v-model="urlCache" placeholder="请输入拉流地址，支持FLV">
   <p class="fs-xxs mb-2">仅支持flv格式,一般情况下在默认rtmp拉流地址后加上flv后缀即可。</p>
   <p class="fs-xxs mb-2" ref="pullState" v-text="pullState"></p>
   <button @click="flvInit">开始</button>
+  <button @click="changeMode" v-text="switchMode" class="mt-2"></button>
+
 </div>
 </template>
 
@@ -20,7 +25,9 @@
         urlCache:'http://39.106.198.9:8000/live/home.flv',
         pullUrl:null,
         flvPlayer:null,
-        pullState:"点击开始进行拉流"
+        pullState:"点击开始进行拉流",
+        isAudio:true,
+        switchMode:"切换为视频拉流"
       }
     },
     methods:{
@@ -29,16 +36,16 @@
         this.flvDestory()
         this.pullUrl = this.urlCache
         if (flvjs.isSupported()) {
-          var videoElement = document.getElementById('videoElement');
+          var MediaElement = document.getElementById('MediaElement');
           this.flvPlayer = flvjs.createPlayer({
               type: 'flv',
               url:this.pullUrl, //本地
-          });
+          })
           this.pullState = "当前拉流地址："+ this.pullUrl
-          this.flvPlayer.attachMediaElement(videoElement);
-          this.flvPlayer.load();
-          this.flvPlayer.play();
-          videoElement.addEventListener('ended',()=>{
+          this.flvPlayer.attachMediaElement(MediaElement)
+          this.flvPlayer.load()
+          this.flvPlayer.play()
+          MediaElement.addEventListener('ended',()=>{
             this.flvInit()
           })
         }
@@ -52,6 +59,16 @@
           this.flvPlayer.destroy()
           this.flvPlayer = null
         }
+      },
+      changeMode(){
+        if(this.isAudio == true){
+          this.isAudio = false
+          this.switchMode = "切换为音频拉流"
+        }else{
+          this.isAudio = true
+          this.switchMode = "切换为视频拉流"
+        }
+        this.flvInit()
       }
     }
   }
