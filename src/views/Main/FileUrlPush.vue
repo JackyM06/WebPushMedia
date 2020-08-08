@@ -1,11 +1,11 @@
 <template>
     <div class="d-flex flex-column jc-center ai-center">        
         <div class="d-flex flex-column jc-center ai-center mt-3">
-          <h3>文件URL推流 (试验阶段)</h3>
+          <h3>公网文件URL推流</h3>
           <p class="fs-xxs text-center mb-1">请输入推流的RTMP地址</p>
           <input class="mb-1 p-1" v-model="pushUrl" type="text" style="width:300px" placeholder="请输入推流的RTMP地址">
-          <p class="fs-xxs mb-1 text-center">请输入文件的URL地址</p>
-          <textarea ref="FileUrl" v-model="FileUrl" style="width:300px" class="fs-xxs mb-2" placeholder="请输入文件的URL地址" rows="5" cols="20"></textarea>
+          <p class="fs-xxs mb-1 text-center">请输入文件在公网的URL地址</p>
+          <textarea ref="FileUrl" v-model="FileUrl" style="width:300px" class="fs-xxs mb-2" placeholder="请输入文件在公网的URL地址" rows="5" cols="20"></textarea>
           <button v-show="!Uploading" @click="beginUpload">开始文件推流</button>
           <button v-show="Uploading" @click="endUploading">取消文件推流</button>
           <p class="fs-xxs my-2 text-center" v-text="message"></p>
@@ -25,7 +25,7 @@
         },
         data () {
             return {
-                pushUrl:'rtmp://39.106.198.9:1935/live/home',
+                pushUrl:null,
                 socket:null,
                 message:'点击开始文件推流进行RTMP推流',
                 Uploading:false,
@@ -82,7 +82,32 @@
               this.Uploading = false
               this.canSend = false
               this.socket = null
+              
             },
+           initPushURL(){
+              if(localStorage.getItem('rtmp') == undefined || !localStorage.getItem('rtmp').includes('rtmp://')){
+                let mockUrl = 'rtmp://39.106.198.9:1935/live/root_'+parseInt(Math.random()*100000)
+                this.pushUrl = mockUrl
+              }else{
+                this.pushUrl = localStorage.getItem('rtmp')
+              }
+            },
+            setPushURL(val){
+              if(val.includes && val.includes('rtmp://')){
+                localStorage.setItem('rtmp',val)
+              }
+            }
+        },
+        mounted(){
+          this.initPushURL()
+        },
+        watch:{
+          message(val){
+            console.log(val)
+          },
+          pushUrl(val){
+            this.setPushURL(val)
+          }
         },
         beforeDestroy(){
           this.endUploading()

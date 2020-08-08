@@ -1,15 +1,15 @@
 <template>
 <div class="box">
   <div v-if="isAudio" class="text-center">
-    <h1 class="mb-4">RTMP语音拉流</h1>
+    <h1 class="mb-4">RTMP（HTTP-FLV）音频拉流</h1>
     <audio id="MediaElement" autoplay  class="my-2" controls="controls"></audio>
   </div>
   <div v-else class="text-center mb-2">
-    <h1 class="mb-4" >RTMP视频拉流</h1>
+    <h1 class="mb-4" >RTMP（HTTP-FLV）视频拉流</h1>
     <video id="MediaElement"  autoplay  controls="controls"></video>
   </div>
   <input type="text" class="inputStyle" v-model="urlCache" placeholder="请输入拉流地址，支持FLV">
-  <p class="fs-xxs mb-2">仅支持flv格式,一般情况下在默认rtmp拉流地址后加上flv后缀即可。</p>
+  <p class="fs-xxs mb-2">仅支持flv格式,为便于调试默认为自动拼接的拉流地址，实际地址请以自身情况为准。</p>
   <p class="fs-xxs mb-2" ref="pullState" v-text="pullState"></p>
   <button @click="flvInit">开始</button>
   <button @click="changeMode" v-text="switchMode" class="mt-2"></button>
@@ -22,7 +22,7 @@
   export default {
     data () {
       return {
-        urlCache:'http://39.106.198.9:8000/live/home.flv',
+        urlCache:null,
         pullUrl:null,
         flvPlayer:null,
         pullState:"点击开始进行拉流",
@@ -69,7 +69,18 @@
           this.switchMode = "切换为视频拉流"
         }
         this.flvInit()
+      },
+      initPullUrl(){
+        if(localStorage.getItem('rtmp').includes('rtmp://')){
+          this.urlCache = this.formatRTMPTtoHTTP(localStorage.rtmp)
+        }
+      },
+      formatRTMPTtoHTTP(rtmp){
+        return 'http' + rtmp.slice(4).replace(/:\d+/,':8000') + '.flv'
       }
+    },
+    mounted () {
+      this.initPullUrl()
     }
   }
 </script>

@@ -3,12 +3,12 @@
         <h3 class="text-center">音频采集</h3>
         <div v-show="!Recording" class="d-flex flex-column ai-center">
             <input class="mb-2 p-1" v-model="pushUrl" type="text" style="width:300px" placeholder="请输入推流的RTMP地址">
-            <button @click="beginRecording">开始录音推流</button>
+            <button @click.stop="beginRecording">开始录音推流</button>
         </div>
         <div v-show="Recording" class="d-flex flex-column jc-center ai-center">
             <h4>本地预览</h4>
             <audio ref="audio" autoplay  controls="controls" muted="muted"></audio>
-            <button @click="endRecording">取消录音推流</button>
+            <button @click.stop="endRecording">取消录音推流</button>
         </div>
         <p class="fs-xxs my-2 text-center" v-text="message"></p>
         <!-- <textarea ref="msg" name="msg" id="" style="width:300px" cols="30" rows="10"></textarea> -->
@@ -31,7 +31,7 @@
                 Recording:false,
                 blobUrl:"",
                 mediaRecorder:null,
-                pushUrl:'rtmp://39.106.198.9:1935/live/home',
+                pushUrl:null,
                 socket:null,
                 message:'点击开始录音进行RTMP推流',
                 canSend:false,
@@ -128,6 +128,7 @@
 
             beginRecording(){
                 // 获取音频流媒体
+                if(!navigator.mediaDevices) return this.throwError()
                 navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
                     this.$refs.audio.srcObject = stream
                     this.$refs.audio.volume = 0
@@ -141,6 +142,8 @@
                         this.socketSend(blob)                                     
                     }
                     this.mediaRecorder.start(1000)
+                }).catch(()=>{
+                  this.throwError()
                 })
             },
             // 结束录音
@@ -148,16 +151,39 @@
                 this.socketDisconnect()
                 if(this.mediaRecorder)this.mediaRecorder.stop()
                 Object.assign(this.$data, this.$options.data())
+                this.initPushURL()
             },
+            initPushURL(){
+              if(localStorage.getItem('rtmp') == undefined || !localStorage.getItem('rtmp').includes('rtmp://')){
+                let mockUrl = 'rtmp://39.106.198.9:1935/live/root_'+parseInt(Math.random()*100000)
+                this.pushUrl = mockUrl
+              }else{
+                this.pushUrl = localStorage.getItem('rtmp')
+              }
+            },
+            setPushURL(val){
+              if(val.includes && val.includes('rtmp://')){
+                localStorage.setItem('rtmp',val)
+              }
+            },
+            throwError(){
+              this.$parent.mediaError()
+            }
+        },
+        mounted(){
+          this.initPushURL()
         },
         watch:{
           message(val){
             console.log(val)
+          },
+          pushUrl(val){
+            this.setPushURL(val)
           }
         },
         beforeDestroy(){
           this.endRecording()
-        }
+        },
     }
 </script>
 
