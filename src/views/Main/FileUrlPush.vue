@@ -86,7 +86,7 @@
             },
            initPushURL(){
               if(localStorage.getItem('rtmp') == undefined || !localStorage.getItem('rtmp').includes('rtmp://')){
-                let mockUrl = 'rtmp://39.106.198.9:1935/live/root_'+parseInt(Math.random()*100000)
+                let mockUrl = `rtmp://${window.location.hostname}:1935/live/root_`+parseInt(Math.random()*100000)
                 this.pushUrl = mockUrl
               }else{
                 this.pushUrl = localStorage.getItem('rtmp')

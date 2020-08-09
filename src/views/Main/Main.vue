@@ -51,8 +51,8 @@
       },
       computed:{
         connectURL(){
-          // return "http://localhost:8090"
-          return "http://39.106.198.9:8090"
+          // 当前部署环境下的连接地址 socket.io
+          return `${window.location.protocol}//${window.location.hostname}:8090`
         }
       },
       methods: {

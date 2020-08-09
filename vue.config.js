@@ -13,5 +13,5 @@ module.exports={
     publicPath:process.env.NODE_ENV === 'production'
     ? '/'
     : '/',
-    // outputDir:__dirname+'/../server/web',
+    outputDir:__dirname+'/../WebPushMediaNodeServer/WebPushMedia',
 }
