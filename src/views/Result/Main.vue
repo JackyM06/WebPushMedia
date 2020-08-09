@@ -6,7 +6,7 @@
   </div>
   <div v-else class="text-center mb-2">
     <h1 class="mb-4" >RTMP（HTTP-FLV）视频拉流</h1>
-    <video id="MediaElement"  autoplay  controls="controls"></video>
+    <video style="max-width:90vw;width: 700px;" id="MediaElement"  autoplay  controls="controls"></video>
   </div>
   <input type="text" class="inputStyle" v-model="urlCache" placeholder="请输入拉流地址，支持FLV">
   <p class="fs-xxs mb-2">仅支持flv格式,为便于调试默认为自动拼接的拉流地址，实际地址请以自身情况为准。</p>

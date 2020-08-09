@@ -38,27 +38,6 @@
             }
         },
         methods:{
-            // HTTP 方案
-            sendBolb(type,url,blob){
-              const BaseURL = "http://localhost:3000"
-              url = BaseURL + url
-              return new Promise((res,rej)=>{
-                let data = new FormData()
-                data.append('media',blob)
-                let request = new XMLHttpRequest()
-                request.open(type,url)
-                request.send(data)
-                request.onreadystatechange = ()=>{
-                  if(request.readyState === 4){
-                    if(request.status === 200){
-                      res('ok')
-                    }else{
-                      rej(new Error("connect was error"))
-                    }
-                  }
-                }
-              }) 
-            },
             // ? websocket 方案 
             // 获取连接 
             socketConnect(wsUrl){
@@ -73,6 +52,7 @@
               })
               this.socket.on('startError',msg =>{
                 this.message = "操作异常请重试，错误信息:"+msg
+                this.endRecording()
               })
             },
             // 发送blob对象
@@ -95,36 +75,7 @@
                 })
               }
             },
-            //  方案3 采用RTCPeerConnection 方案 (已废弃)
-            RtcpeerConnect(stream){
-              const pc = new RTCPeerConnection({
-                sdpSemantics: 'unified-plan',
-              })
-              stream.getTracks().forEach((track) =>
-                pc.addTransceiver(track, {
-                  direction: 'sendrecv',
-                  streams: [stream],
-                })
-              )
-              pc.addEventListener('track', (e) => {
-                this.$refs.audio.srcObject = e.streams[0]
-              })
-              pc.createOffer()
-              .then((offer) => pc.setLocalDescription(offer)) //设置本地描述
-              .then(() =>{
-                fetch('http://localhost:3000/connect', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'text/plain' },
-                  body: pc.localDescription.sdp,
-                })
-              .then((res) => {
-                if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-                return res.json();
-              })  
-              .then((answer) => pc.setRemoteDescription(answer))
-              .catch((err) => console.error(err));
-              })
-            },
+          
 
             beginRecording(){
                 // 获取音频流媒体
@@ -148,8 +99,8 @@
             },
             // 结束录音
             endRecording(){
-                this.socketDisconnect()
                 if(this.mediaRecorder)this.mediaRecorder.stop()
+                this.socketDisconnect()
                 Object.assign(this.$data, this.$options.data())
                 this.initPushURL()
             },

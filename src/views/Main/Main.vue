@@ -1,7 +1,13 @@
 <template>
     <div class="h-100 d-flex flex-column jc-around ai-center">
-        <div class="text-center">
-          <h1 class="mb-3">流媒体采集推流</h1>
+        <div class="text-center container-main">
+          <h1 class="mb-3">流媒体采集推流
+            <span title="点击推流没反应？" class=" text-grey cursor-point" @click.stop="showInfo = true">
+              <svg class="icon"  aria-hidden="true">
+                <use xlink:href="#icon-wenhao"  ></use>
+              </svg>
+            </span>
+          </h1>
           <button id="mainEl" class="mr-2" @click="selectMode(0,$event)" disabled>麦克风推流</button>
           <button class="mr-2" @click="selectMode(1,$event)">本地文件推流</button>
           <button class="mr-2" @click="selectMode(2,$event)">文件URL推流</button>
@@ -52,6 +58,7 @@
       computed:{
         connectURL(){
           // 当前部署环境下的连接地址 socket.io
+          // return 'http://localhost:8090'
           return `${window.location.protocol}//${window.location.hostname}:8090`
         }
       },
@@ -84,5 +91,7 @@
 </script>
 
 <style lang="scss" scoped>
-
+  .container-main button{
+    margin-bottom: 5px;
+  }
 </style>
