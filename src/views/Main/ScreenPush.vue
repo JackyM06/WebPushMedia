@@ -59,7 +59,7 @@
             if(this.canSend){
               this.socket.emit("sendBlob", blob)
               this.socket.on('sent',()=>{
-              this.message = "正在推流，可到采集结果中拉流查看效果"
+              this.message = "正在推流直播中，现在可到“采集结果”中拉流查看效果"
             })
             }else{
               this.message = '当前连接存在波动，正在重试'
@@ -77,28 +77,24 @@
           beginRecording(){
               if(!navigator.mediaDevices) return this.throwError()
               // 获取音频流媒体
-              if (navigator.mediaDevices.getUserMedia) {
-                try{
-                  navigator.mediaDevices.getDisplayMedia({video:true}).then(stream => {
-                    this.$refs.video.srcObject = stream
-                    this.$refs.video.volume = 0
-                    this.socketConnect(this.connectURL)
-                    this.Recording = true
-                    // 创建MediaStreamRecorder对象
-                    this.mediaRecorder = new MediaStreamRecorder(stream)
-                    this.mediaRecorder.mimeType = 'video/webm';
-                    this.mediaRecorder.ondataavailable = (blob) => {
-                        this.socket && this.socketSend(blob)                                     
-                    }
-                    this.mediaRecorder.start(3000)
-                  }).catch(err=>{
-                     console.log('err: ', err);
-                     this.throwError()
-                  })
-                }catch(err){
-                  console.log('err: ', err);
-
-                }
+              if (navigator.mediaDevices.getDisplayMedia) {
+                navigator.mediaDevices.getDisplayMedia({video:true}).then(stream => {
+                  this.$refs.video.srcObject = stream
+                  this.$refs.video.volume = 0
+                  this.socketConnect(this.connectURL)
+                  this.Recording = true
+                  // 创建MediaStreamRecorder对象
+                  this.mediaRecorder = new MediaStreamRecorder(stream)
+                  this.mediaRecorder.mimeType = 'video/webm';
+                  this.mediaRecorder.ondataavailable = (blob) => {
+                      this.socket && this.socketSend(blob)                                     
+                  }
+                  // 启动后3s发送一次数据包
+                  this.mediaRecorder.start(3000)
+                }).catch(err=>{
+                   console.log('err: ', err);
+                   this.throwError()
+                })
               }else{
                 alert('当前版本浏览器不支持共享屏幕')
               }

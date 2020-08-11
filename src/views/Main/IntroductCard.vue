@@ -1,7 +1,7 @@
 <template>
 <div class="font-style intrCard card-s">
     <h2 class="p-0 m-0">一、当前站点可能未添加到浏览器白名单，无法调用多媒体设备</h2>
-    <h3 class="p-0 m-0">请参看：chrome浏览器中让HTTP站点突破设备权限办法</h3>
+    <h3 class="p-0 m-0">请参看下列步骤：chrome浏览器中让HTTP站点突破设备权限办法</h3>
     <ol>
         <li>在chrome地址栏中输入<strong>chrome://flags/#unsafely-treat-insecure-origin-as-secure</strong>并回车</li>
         <li>将<span class="bg-yellow font-weight" >Insecure origins treated as secure</span>下的<span class="text-blue">Disabled</span>

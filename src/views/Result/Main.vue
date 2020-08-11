@@ -26,8 +26,16 @@
         pullUrl:null,
         flvPlayer:null,
         pullState:"点击开始进行拉流",
-        isAudio:true,
-        switchMode:"切换为视频拉流"
+        isAudio:false,
+      }
+    },
+    computed:{
+      switchMode(){
+        if(this.isAudio){
+          return "切换为视频拉流"
+        }else{
+          return "切换为音频拉流"
+        }
       }
     },
     methods:{
@@ -60,27 +68,29 @@
           this.flvPlayer = null
         }
       },
+      // 为flv播放器添加事件
+      addEventByFlv(){
+        if(!this.flvPlayer)return
+        // this.flvPlayer.on
+      },
+      // 修改播放器模式
       changeMode(){
-        if(this.isAudio == true){
-          this.isAudio = false
-          this.switchMode = "切换为音频拉流"
-        }else{
-          this.isAudio = true
-          this.switchMode = "切换为视频拉流"
-        }
+        this.isAudio = !this.isAudio
         this.flvInit()
       },
+      // 初始化拉流地址
       initPullUrl(){
-        if(localStorage.getItem('rtmp').includes('rtmp://')){
-          this.urlCache = this.formatRTMPTtoHTTP(localStorage.rtmp)
-        }
+        let rtmp = this.$route.query.pullUrl
+        this.urlCache = this.formatRTMPTtoHTTP(rtmp)
       },
+      // 格式化rtmp为http-flv
       formatRTMPTtoHTTP(rtmp){
         return 'http' + rtmp.slice(4).replace(/:\d+/,':8000') + '.flv'
       }
     },
     mounted () {
       this.initPullUrl()
+      this.flvInit()
     }
   }
 </script>

@@ -25,7 +25,7 @@
             </transition>
         </div>
 
-        <router-link tag="a" target="_blank" to="/pull" >采集结果</router-link>
+        <router-link tag="a" target="_blank" :to="routeInfo" >采集结果</router-link>
         <transition name="bounce">
             <introduct-card ref="showPanel" v-show="showInfo"></introduct-card>
         </transition>
@@ -45,6 +45,7 @@
           currentSelect:0,
           element:null,
           showInfo:false,
+          
         }
       },
       components:{
@@ -60,6 +61,14 @@
           // 当前部署环境下的连接地址 socket.io
           // return 'http://localhost:8090'
           return `${window.location.protocol}//${window.location.hostname}:8090`
+        },
+        routeInfo(){
+          return {
+            path:"/pull",
+            query:{
+              pullUrl:localStorage.rtmp
+            }
+          }
         }
       },
       methods: {

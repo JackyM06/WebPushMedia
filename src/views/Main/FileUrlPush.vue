@@ -70,7 +70,7 @@
                 this.message = '当前连接存在波动，正在重试'
               }
               this.socket.on('sent',()=>{
-                this.message = "正在推流，可到采集结果中拉流查看效果"
+                this.message = "正在推流直播中，现在可到“采集结果”中拉流查看效果"
               })
             },
 

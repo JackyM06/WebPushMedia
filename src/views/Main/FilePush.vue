@@ -72,7 +72,7 @@
                 this.message = "当前连接中断，请重试"
               }
               this.socket.on('sent',()=>{
-                this.message = "正在推流中，可到采集结果中拉流查看效果"
+                this.message = "正在推流直播中，现在可到“采集结果”中拉流查看效果"
               })
             },
             beginUpload(){
@@ -103,14 +103,14 @@
             },
             // 文件分片上传
             sliceUpload(blob){
-              const chunk = 1024*1024 //字节，一次上传1MB
+              const chunk = 3*1024*1024 //字节，一次上传1MB
               let length = Math.ceil(blob.size/chunk)
               for(let i=0;i<length;i++){
                 this.sendTimer.push(
                   setTimeout(()=>{
                     let partBlob = blob.slice(i*chunk,(i+1)*chunk,blob.type)
                     this.socketFileSend(partBlob)
-                  },i*3000) //默认3s发送一次数据包
+                  },i*1000*10) //默认10s发送一次数据包
                 ) 
               }
             },
